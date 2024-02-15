@@ -1,4 +1,5 @@
-import streamlit as st
+import sys
+sys.path.append("D:/Decoreba/api")
 import cadastro
 
 # Função principal

@@ -1,40 +1,62 @@
-import sys
-sys.path.append("D:/Decoreba/api")
-import cadastro
+import streamlit as st
+import sqlite3
 
-# Função principal
+# Função para autenticar o usuário com base no CPF e senha
+def autenticar_usuario(cpf, senha):
+    conn = sqlite3.connect('D:/Decoreba/data/decoreba.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM usuarios WHERE CPF = ? AND senha = ?", (cpf, senha))
+    usuario = c.fetchone()
+    conn.close()
+    return usuario
+
+# Função para criar um novo usuário
+def cadastrar_usuario(nome, cpf, periodo_medicina, senha):
+    conn = sqlite3.connect('D:/Decoreba/data/decoreba.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO usuarios (nome, CPF, periodo_medicina, senha) VALUES (?, ?, ?, ?)", (nome, cpf, periodo_medicina, senha))
+    conn.commit()
+    conn.close()
+
+# Função principal para a interface de usuário
 def main():
-    st.title('Decoreba')
-    st.caption('O seu aplicativo de revisão espaçada!')
+    st.title("Acesso ao Decoreba")
 
-    # Verifica se o botão "Cadastre-se" foi clicado
-    cadastre_se_clicked = st.button('Cadastre-se')
+    # Página de login
+    if "pagina" not in st.session_state:
+        st.session_state.pagina = "login"
 
-    # Renderiza a página de cadastro se o botão "Cadastre-se" foi clicado
-    if cadastre_se_clicked:
-        # Renderiza a página de cadastro
-        cadastro.render_cadastro()
+    if st.session_state.pagina == "login":
+        st.header("Login")
 
-    # Renderiza o botão "Cadastre-se" apenas se ainda não foi clicado
-    if not cadastre_se_clicked:
-        render_login()
+        cpf = st.text_input("CPF")
+        senha = st.text_input("Senha", type="password")
 
-# Função para renderizar a página de login
-def render_login():
-    st.write('Entre com seu CPF e senha para acessar sua conta.')
-    cpf = st.text_input('CPF', key='cpf_input')  # Definindo chave única
-    senha = st.text_input('Senha', type='password', key='senha_input')  # Definindo chave única
-    if st.button('Entrar'):
-        if autenticar_usuario(cpf, senha):
-            st.success('Login bem-sucedido!')
-            # Aqui você pode redirecionar para a próxima página após o login
-        else:
-            st.error('CPF ou senha incorretos.')
+        if st.button("Entrar"):
+            usuario = autenticar_usuario(cpf, senha)
+            if usuario:
+                st.success(f"Bem-vindo, {usuario[1]}!")
+                # Adicione aqui a lógica para redirecionar para a página principal após o login
+            else:
+                st.error("CPF ou senha incorretos. Por favor, tente novamente.")
 
-# Função para autenticar um usuário
-def autenticar_usuario(CPF, senha):
-    # Coloque sua lógica de autenticação aqui
-    return True  # Apenas para simular uma autenticação bem-sucedida
+        st.markdown("Não possui uma conta? [Cadastre-se aqui](#cadastrar)")
 
-if __name__ == '__main__':
+    # Página de cadastro
+    elif st.session_state.pagina == "cadastrar":
+        st.header("Cadastro")
+
+        nome = st.text_input("Nome")
+        cpf = st.text_input("CPF")
+        periodo_medicina = st.selectbox("Período de Medicina", ["1º período", "2º período", "3º período", "4º período", "5º período", "6º período", "7º período", "8º período", "9º período", "10º período"])
+        senha = st.text_input("Senha", type="password")
+
+        if st.button("Cadastrar"):
+            cadastrar_usuario(nome, cpf, periodo_medicina, senha)
+            st.success("Usuário cadastrado com sucesso!")
+            st.session_state.pagina = "login"
+
+    st.write("")
+
+if __name__ == "__main__":
     main()

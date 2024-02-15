@@ -10,14 +10,6 @@ def autenticar_usuario(cpf, senha):
     conn.close()
     return usuario
 
-# Função para criar um novo usuário
-def cadastrar_usuario(nome, cpf, periodo_medicina, senha):
-    conn = sqlite3.connect('D:/Decoreba/data/decoreba.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO usuarios (nome, CPF, periodo_medicina, senha) VALUES (?, ?, ?, ?)", (nome, cpf, periodo_medicina, senha))
-    conn.commit()
-    conn.close()
-
 # Função principal para a interface de usuário
 def main():
     st.title("Acesso ao Decoreba")
@@ -46,15 +38,8 @@ def main():
     elif st.session_state.pagina == "cadastrar":
         st.header("Cadastro")
 
-        nome = st.text_input("Nome")
-        cpf = st.text_input("CPF")
-        periodo_medicina = st.selectbox("Período de Medicina", ["1º período", "2º período", "3º período", "4º período", "5º período", "6º período", "7º período", "8º período", "9º período", "10º período"])
-        senha = st.text_input("Senha", type="password")
-
-        if st.button("Cadastrar"):
-            cadastrar_usuario(nome, cpf, periodo_medicina, senha)
-            st.success("Usuário cadastrado com sucesso!")
-            st.session_state.pagina = "login"
+        # Executando a página de cadastro
+        exec(open("cadastro.py").read())
 
     st.write("")
 
